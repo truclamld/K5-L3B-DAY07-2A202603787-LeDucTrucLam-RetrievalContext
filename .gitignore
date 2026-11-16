@@ -5,7 +5,10 @@ __pycache__/
 .env.*
 !.env.example
 .codex-log/
+.DS_Store
+.idea/
 
 # Local datasets and generated output; share permitted artifacts deliberately
 starter/data/
 starter/results/
+/starter/day06_starter/
