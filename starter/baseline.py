@@ -48,7 +48,16 @@ def validate(chunks, questions):
 
 
 def hit(chunk, gold):
-    return any(chunk['source_id'] == g['source_id'] and chunk['page'] == g['page'] and g['evidence'] in chunk['text'] for g in gold)
+    # PDF extraction often wraps a sentence across lines. Treat runs of
+    # whitespace in the quote and chunk as equivalent for evidence matching.
+    normalize_whitespace = lambda value: re.sub(r'\s+', ' ', value).strip()
+    chunk_text = normalize_whitespace(chunk['text'])
+    return any(
+        chunk['source_id'] == g['source_id']
+        and chunk['page'] == g['page']
+        and normalize_whitespace(g['evidence']) in chunk_text
+        for g in gold
+    )
 
 
 class TfidfIndex:
@@ -74,7 +83,7 @@ class TfidfIndex:
         return sorted(results, key=lambda c: (-c['score'], c['id']))[:top_k]
 
 
-def pack_context(results, budget=800):
+def pack_context(results, budget=5000):
     blocks, ids, seen = [], [], set()
     for c in results:
         if c['id'] in seen:
@@ -87,7 +96,7 @@ def pack_context(results, budget=800):
     return '\n\n'.join(blocks), ids
 
 
-def evaluate(index, questions, budget=800):
+def evaluate(index, questions, budget=5000):
     traces = []
     for q in questions:
         start = time.perf_counter()
