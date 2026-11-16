@@ -1,0 +1,217 @@
+[
+  {
+    "id": "agent-dev-true-01",
+    "split": "dev",
+    "question": "Theo tutorial, `list.sort()` trả về gì khi nó chỉ sửa đổi list?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Nó không trả về giá trị; kết quả mặc định là `None`.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 38, "evidence": "methods like insert, remove or sort that only modify the list have no return value printed – they return the default None."}]
+  },
+  {
+    "id": "agent-dev-true-02",
+    "split": "dev",
+    "question": "Trong ví dụ queue dùng `collections.deque`, lần gọi `queue.popleft()` đầu tiên trả về phần tử nào?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "`Eric`.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 39, "evidence": ">>> queue.popleft() # The first to arrive now leaves\n'Eric'"}]
+  },
+  {
+    "id": "agent-dev-true-03",
+    "split": "dev",
+    "question": "Một set trong Python có tự loại bỏ các phần tử trùng lặp không?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Có. Set không chứa phần tử trùng lặp.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 43, "evidence": "A set is an unordered collection with no duplicate elements."}]
+  },
+  {
+    "id": "agent-dev-true-04",
+    "split": "dev",
+    "question": "Trong tài liệu Python 3.7 này, `list(d)` trả về gì khi `d` là dictionary?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Danh sách các key của dictionary theo thứ tự chèn; dùng sorted(d) nếu muốn sắp xếp.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 44, "evidence": "Performing list(d) on a dictionary returns a list of all the keys used in the dictionary, in insertion order (if you want it sorted, just use sorted(d) instead)."}]
+  },
+  {
+    "id": "agent-dev-true-05",
+    "split": "dev",
+    "question": "Làm sao lấy key và value cùng lúc khi duyệt qua dictionary?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Dùng phương thức `items()`.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 45, "evidence": "When looping through dictionaries, the key and corresponding value can be retrieved at the same time using the items() method."}]
+  },
+  {
+    "id": "agent-dev-true-06",
+    "split": "dev",
+    "question": "Dùng `enumerate()` khi duyệt sequence thì có thể lấy đồng thời những gì?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Chỉ số vị trí và giá trị tương ứng.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 45, "evidence": "When looping through a sequence, the position index and corresponding value can be retrieved at the same time using the enumerate() function."}]
+  },
+  {
+    "id": "agent-dev-true-07",
+    "split": "dev",
+    "question": "Khi mở file ở chế độ nhị phân, dữ liệu được đọc và ghi dưới dạng gì?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Dưới dạng đối tượng bytes.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 63, "evidence": "'b' appended to the mode opens the file in binary mode: now the data is read and written in the form of bytes objects."}]
+  },
+  {
+    "id": "agent-dev-true-08",
+    "split": "dev",
+    "question": "Mệnh đề `finally` có được chạy nếu khối `try` phát sinh exception không?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Có. finally luôn chạy trước khi rời try; exception chưa được xử lý sẽ được raise lại sau đó.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 72, "evidence": "A finally clause is always executed before leaving the try statement, whether an exception has occurred or not."}]
+  },
+  {
+    "id": "agent-dev-true-09",
+    "split": "dev",
+    "question": "Dùng `with` để mở file giúp bảo đảm điều gì sau khi khối lệnh kết thúc?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "File được đóng, kể cả khi có lỗi trong lúc xử lý các dòng.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 73, "evidence": "After the statement is executed, the file f is always closed, even if a problem was encountered while pro-\ncessing the lines."}]
+  },
+  {
+    "id": "agent-dev-true-10",
+    "split": "dev",
+    "question": "Generator expression thường tiết kiệm bộ nhớ hơn cấu trúc nào tương đương?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "List comprehension tương đương.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 87, "evidence": "Generator expressions are more compact but less versatile than full generator definitions and tend to be more memory friendly than equivalent list comprehensions."}]
+  },
+  {
+    "id": "agent-test-true-01",
+    "split": "test",
+    "question": "Tuple chứa list có thể thay đổi nội dung của list đó sau khi tuple được tạo không?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Có thể thay đổi đối tượng list bên trong; tuple vẫn immutable ở các phần tử của chính tuple.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 42, "evidence": "it is possible to create tuples which contain mutable objects, such as lists."}]
+  },
+  {
+    "id": "agent-test-true-02",
+    "split": "test",
+    "question": "Muốn tạo một tuple chỉ có một phần tử, chi tiết cú pháp nào là cần thiết?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Dấu phẩy sau phần tử; dấu ngoặc đơn không đủ để tạo tuple một phần tử.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 42, "evidence": "a tuple with one item is\nconstructed by following a value with a comma"}]
+  },
+  {
+    "id": "agent-test-true-03",
+    "split": "test",
+    "question": "Dùng biểu thức `1.00 % 0.10` với float cho kết quả nào trong ví dụ của tutorial?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "0.09999999999999995.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 101, "evidence": ">>> 1.00 % 0.10\n0.09999999999999995"}]
+  },
+  {
+    "id": "agent-test-true-04",
+    "split": "test",
+    "question": "Theo tutorial, `sys.exit()` được dùng để làm gì?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Để kết thúc một script.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 90, "evidence": "The most direct way to terminate a script is to use sys.exit()."}]
+  },
+  {
+    "id": "agent-test-true-05",
+    "split": "test",
+    "question": "Theo hướng dẫn trong tutorial, một exception class được truyền cho `raise` sẽ được xử lý như thế nào?",
+    "answerable": true,
+    "expected_behavior": "search_and_answer",
+    "expected_answer": "Nó được khởi tạo ngầm bằng cách gọi constructor không đối số.",
+    "gold": [{"source_id": "python-tutorial-3-7-0", "page": 70, "evidence": "If an exception class is passed, it will be implicitly instantiated by calling its constructor with no arguments:"}]
+  },
+  {
+    "id": "agent-dev-false-01",
+    "split": "dev",
+    "question": "CPython 3.7 dùng thuật toán sắp xếp nội bộ cụ thể nào cho `list.sort()`, và thuật toán đó chia mảng thành những run tối đa bao nhiêu phần tử?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tutorial mô tả list.sort() sắp xếp tại chỗ nhưng không nêu thuật toán triển khai nội bộ hay kích thước run. Đã rà soát toàn bộ 98 chunk của tài liệu."
+  },
+  {
+    "id": "agent-dev-false-02",
+    "split": "dev",
+    "question": "Global Interpreter Lock của CPython được nhả chính xác trong những system call nào khi dùng thread?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu không trình bày GIL hay hành vi nhả khóa theo system call; nội dung về thread không cung cấp các điều kiện này. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-dev-false-03",
+    "split": "dev",
+    "question": "Tutorial cho biết `collections.deque` nhanh hơn list bao nhiêu lần khi gọi `popleft()` với một triệu phần tử?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu chỉ mô tả deque có thao tác hai đầu nhanh và list không hiệu quả cho hàng đợi; không có benchmark, số phần tử hay hệ số tốc độ. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-dev-false-04",
+    "split": "dev",
+    "question": "Tutorial quy định mức recursion limit mặc định chính xác của CPython 3.7 là bao nhiêu?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu không cho giá trị recursion limit mặc định của phiên bản Python; không có con số này trong các chunk. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-dev-false-05",
+    "split": "dev",
+    "question": "Tutorial đưa ra độ phức tạp Big-O được đảm bảo của thao tác chèn key mới vào dictionary là bao nhiêu?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu giải thích cách dùng dictionary nhưng không đưa ra bảo đảm độ phức tạp Big-O cho thao tác chèn. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-test-false-01",
+    "split": "test",
+    "question": "Theo tutorial này, `asyncio` dùng event loop mặc định nào trên Windows và chính sách đó bắt đầu từ phiên bản nào?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tutorial Python 3.7 này không đề cập asyncio, event loop trên Windows hay lịch sử thay đổi policy. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-test-false-02",
+    "split": "test",
+    "question": "Trên bản build CPython 64-bit mà tutorial dùng, một list rỗng chiếm chính xác bao nhiêu byte theo `sys.getsizeof([])`?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu không xác định môi trường build 64-bit hay kích thước bộ nhớ của list rỗng; không có kết quả sys.getsizeof. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-test-false-03",
+    "split": "test",
+    "question": "Tutorial bảo đảm thao tác đọc và ghi đồng thời trên cùng một file object là thread-safe như thế nào?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Phần file mô tả mode, encoding và đóng file, không nêu bảo đảm thread-safety khi truy cập đồng thời. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-test-false-04",
+    "split": "test",
+    "question": "Theo tutorial, một dictionary có bao nhiêu byte overhead cho mỗi entry trên CPython 3.7?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu giải thích cấu trúc và cách dùng dictionary nhưng không có số đo bộ nhớ cho mỗi entry. Đã rà soát toàn bộ 98 chunk."
+  },
+  {
+    "id": "agent-test-false-05",
+    "split": "test",
+    "question": "Tutorial cho biết chính xác bản phát hành Python mới nhất hiện nay là phiên bản nào?",
+    "answerable": false,
+    "expected_behavior": "search_and_abstain",
+    "absence_reason": "Tài liệu là Python Tutorial 3.7.0, không nêu phiên bản mới nhất tại thời điểm hiện tại; câu hỏi còn yêu cầu thông tin cập nhật ngoài tài liệu. Đã rà soát toàn bộ 98 chunk."
+  }
+]

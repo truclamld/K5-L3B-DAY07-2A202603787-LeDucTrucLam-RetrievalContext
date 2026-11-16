@@ -76,6 +76,22 @@ Chỉ chạy test sau khi đã chốt lựa chọn bằng dev; test Day 6 đã t
 
 ## 5. Tổng hợp đánh giá agent
 
+### Chạy agent thật với hai tool retrieval
+
+`OpenAIController` gọi endpoint Chat Completions tương thích OpenAI và cho model chọn `vector_search` (dense cosine) hoặc `keyword_search` (TF-IDF). Hai tool dùng chung corpus. Cấu hình `AGENT_MODEL`, `AGENT_API_KEY` (hoặc `OPENAI_API_KEY`/`OPENROUTER_API_KEY`), `EMBEDDING_MODEL` và `EMBEDDING_DIMENSIONS` trong `.env`. Đặt `DAY6_ENV_FILE` trỏ tới file đó; không commit file bí mật. Dense search cần embedding model cùng loại/chiều với index Day 6; TF-IDF không cần embedding.
+
+Runner mặc định giới hạn 3 lượt tìm tổng cộng cho mỗi câu, top-5 mỗi lượt và context tối đa 5.000 ký tự. Ví dụ chạy dev:
+
+```bash
+DAY6_ENV_FILE=starter/day06_starter/.env python3 -m starter.agent_runner \
+  --chunks starter/data/converted/chunks.json \
+  --questions data/agent_cases.json \
+  --split dev --max-searches 3 --top-k 5 --budget 5000 \
+  --output starter/results/agent-two-tools-dev
+```
+
+Runner lưu `cases.json`, `traces.json` và `run_summary.json`. Trace giữ tool, query, kết quả, context sau mỗi lần tìm, câu trả lời, citation, lỗi, thời gian và token usage. Chi phí tiền tệ để `null` vì bảng giá phụ thuộc provider/model; không tự đoán. Gold và expected answer bị loại khỏi dữ liệu gửi cho controller; câu thiếu evidence dùng `answerable: false` và `expected_behavior` để tạo cases sau khi chạy.
+
 Sau khi chạy agent thật và tự chấm, chuẩn bị ba JSON array:
 
 - `cases.json`: mỗi câu có `id`, `split`, `answerable` (`true` nếu có đủ evidence).
