@@ -1,0 +1,3 @@
+# External dependency imported by the starter code.
+python-dotenv>=1,<2
+json
