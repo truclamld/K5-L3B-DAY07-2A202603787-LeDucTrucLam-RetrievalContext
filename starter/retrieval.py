@@ -38,7 +38,8 @@ class Day6Retriever:
     def __init__(self, method: str, chunks_path: str | Path = "starter/data/converted/chunks.json",
                  strategy: str = "B_paragraph", *, embedder: Any | None = None,
                  chunks: list[dict[str, Any]] | None = None,
-                 document_vectors: list[list[float]] | None = None) -> None:
+                 document_vectors: list[list[float]] | None = None,
+                 query_vectors: dict[str, list[float]] | None = None) -> None:
         if method not in {"dense", "tfidf", "hybrid"}:
             raise ValueError("method must be dense, tfidf, or hybrid")
         env_path = os.getenv("DAY6_ENV_FILE", ".env")
@@ -50,6 +51,7 @@ class Day6Retriever:
             raise ValueError(f"No chunks loaded from {chunks_path}")
         self.index = TfidfIndex(self.chunks)
         self.embedder = embedder
+        self.query_vectors = query_vectors if query_vectors is not None else {}
         self.vectors: list[list[float]] = []
         if method in {"dense", "hybrid"}:
             if self.embedder is None:
@@ -88,7 +90,10 @@ class Day6Retriever:
 
     def _dense(self, query: str, top_k: int, filters: dict[str, Any] | None):
         assert self.embedder is not None
-        vector = self.embedder.embed_query(query)
+        vector = self.query_vectors.get(query)
+        if vector is None:
+            vector = self.embedder.embed_query(query)
+            self.query_vectors[query] = vector
         rows = [{**self.chunks[i], "score": self._cosine(vector, self.vectors[i]), "strategy": "dense"}
                 for i in self._eligible(filters)]
         return sorted(rows, key=lambda r: (-r["score"], r["id"]))[:top_k]
@@ -98,15 +103,24 @@ class Day6Retriever:
         return [row for row in rows if self._matches_filters(row, filters)][:top_k]
 
     def search(self, query: str, *, filters: dict[str, Any] | None = None,
-               top_k: int = 3) -> list[dict[str, Any]]:
+               top_k: int = 3, candidate_k: int | None = None,
+               rerank: str | None = None) -> list[dict[str, Any]]:
         if top_k <= 0:
             raise ValueError("top_k must be positive")
+        if candidate_k is not None and candidate_k < top_k:
+            raise ValueError("candidate_k must be at least top_k")
+        if rerank not in {None, "dense"}:
+            raise ValueError("rerank must be None or 'dense'")
+        if rerank and self.method != "hybrid":
+            raise ValueError("dense reranking is available for hybrid retrieval only")
         if self.method == "dense":
             return self._dense(query, top_k, filters)
         if self.method == "tfidf":
             return self._lexical(query, top_k, filters)
-        depth = max(20, top_k)
-        dense = self._dense(query, depth, filters)
+        candidate_k = candidate_k if candidate_k is not None else top_k
+        depth = max(20, candidate_k)
+        dense_all = self._dense(query, len(self.chunks), filters)
+        dense = dense_all[:depth]
         lexical = self._lexical(query, depth, filters)
         combined: dict[str, dict[str, Any]] = {}
         for name, ranking in (("dense", dense), ("tfidf", lexical)):
@@ -114,4 +128,12 @@ class Day6Retriever:
                 item = combined.setdefault(row["id"], {**row, "score": 0.0, "rrf_ranks": {}})
                 item["score"] += 1.0 / (60 + rank)
                 item["rrf_ranks"][name] = rank
-        return sorted(combined.values(), key=lambda r: (-r["score"], r["id"]))[:top_k]
+        candidates = sorted(combined.values(), key=lambda r: (-r["score"], r["id"]))[:candidate_k]
+        if rerank == "dense":
+            dense_scores = {row["id"]: row["score"] for row in dense_all}
+            candidates.sort(key=lambda r: (-dense_scores.get(r["id"], float("-inf")), r["id"]))
+            for row in candidates:
+                row["rrf_score"] = row["score"]
+                row["score"] = dense_scores.get(row["id"], 0.0)
+                row["reranker"] = "dense_cosine"
+        return candidates[:top_k]
