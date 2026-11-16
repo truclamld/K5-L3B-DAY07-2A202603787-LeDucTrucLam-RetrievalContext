@@ -6,8 +6,10 @@
 | `baseline.py` | TF-IDF lexical baseline, chạy offline |
 | `convert_day6.py` | Chuyển một số trường JSON từ Day 6 |
 | `agent_metrics.py` | Tổng hợp nhãn đánh giá do bạn tự chấm |
+| `retrieval.py` | Dense, TF-IDF và hybrid RRF trên cùng file chunks local đã convert |
+| `evaluate_retrieval.py` | So sánh ba retriever trên split dev/test và lưu trace |
 
-Starter **chưa phải solution hoàn chỉnh**. Bạn phải nối model và vector store thật, triển khai ít nhất 3 phương pháp retrieval do bạn chọn, gồm dense trên vector store Day 6. Mock chỉ dùng để test code.
+Starter **chưa phải solution hoàn chỉnh**. Bạn cần cấu hình embedding provider thật và đánh giá kết quả; không dùng mock để báo cáo benchmark.
 
 ## 1. Kết nối agent
 
@@ -40,9 +42,39 @@ python3 starter/baseline.py --chunks starter/data/converted/chunks.json --questi
 
 Thay phần trong `< >` bằng đường dẫn thật. Script chỉ đổi tên trường, không tự truy cập database hay đoán evidence. Nếu cấu trúc khác, tự viết adapter. Đối chiếu lại nguồn, trang và evidence.
 
+Trong workspace hiện tại, dữ liệu Day 6 nằm ở `data/day6_chunks.jsonl` và `data/day6_questions.jsonl`. Converter nhận cả JSON array lẫn JSONL và tạo `chunks.json`/`questions.json` local. Dùng đúng cặp file converted cho cả baseline và ba retriever để giữ corpus/chunk nhất quán.
+
+## 4. Ba phương pháp truy xuất trên file local
+
+`retrieval.py` đọc trực tiếp cùng file `chunks.json` đã convert và dùng chung tập chunk cho cả ba phương pháp:
+
+1. **Dense:** embed các chunk local và câu hỏi bằng cùng model/chiều, rồi xếp hạng cosine trong bộ nhớ. Không cần PostgreSQL; cần kết nối embedding API.
+2. **TF-IDF:** xếp hạng từ khóa trên đúng các chunk local, dùng cùng `TfidfIndex` như baseline. Tokenizer đơn giản nên cần nêu hạn chế với tiếng Việt.
+3. **Hybrid RRF:** hợp nhất ranking dense và TF-IDF bằng Reciprocal Rank Fusion, `1/(60 + rank)`. RRF tránh cộng trực tiếp score từ hai thang đo khác nhau.
+
+Đặt `.env` tại `starter/day06_starter/.env` theo `.env.example`; dense cần API key, `EMBEDDING_MODEL` và đúng `EMBEDDING_DIMENSIONS`. PostgreSQL/`DATABASE_URL` không được dùng ở benchmark local này. Không commit `.env`. Cài dependencies trong môi trường Python đang chạy Day 7 bằng `python3 -m pip install -r starter/day06_starter/requirements.txt`.
+
+```bash
+python3 -c 'from starter.retrieval import Day6Retriever; r=Day6Retriever("dense", "starter/data/converted/chunks.json"); print(r.search("What does floor division do?", top_k=3))'
+```
+
+Thay `dense` lần lượt bằng `tfidf` và `hybrid` để xem từng phương pháp. Kết quả gồm ID, nội dung, nguồn, trang, metadata và score; hybrid có thêm rank thành phần. Với `tfidf`, không cần cấu hình embedding.
+
+Chạy so sánh trên chính các file đã convert. Ngoài ba phương pháp top-3, evaluator tự chạy hai thí nghiệm: hybrid top-5 và hybrid RRF lấy 10 candidates rồi rerank theo cosine dense để trả top-3. Query embedding được tạo một lần cho mỗi câu rồi dùng chung cho mọi cấu hình; thời gian API query được tính vào thời gian dense/hybrid. Context Evidence Rate dùng cùng hàm đóng gói context của baseline; mặc định budget 5.000 ký tự, có thể đổi bằng `--context-budget`:
+
+```bash
+python3 starter/evaluate_retrieval.py --chunks starter/data/converted/chunks.json --questions starter/data/converted/questions.json --split dev --output starter/results/retrieval-dev
+```
+
+Summary tách cấu hình `hybrid_top5` (Evidence Hit@5) và `hybrid_rerank10_top3` (Hit@1/Evidence Hit@3) khỏi `hybrid` top-3. Mỗi trace lưu context đã đóng gói, ID chunk trong context, số ký tự và cờ `context_evidence_hit`; summary có tỷ lệ context evidence và độ dài context trung bình. Reranker ở đây dùng cosine dense trên candidate pool RRF, không dùng thêm model. Có thể đổi top-k, candidate pool và budget bằng các tham số CLI tương ứng.
+
+Đổi hai đường dẫn nếu baseline TF-IDF của bạn dùng thư mục converted khác. Câu hỏi có thể theo schema converted (mảng `gold`) hoặc schema Day 6 JSONL (`gold_source_id`, `gold_page`, `evidence_quote`).
+
+Chỉ chạy test sau khi đã chốt lựa chọn bằng dev; test Day 6 đã từng được xem ở lab trước, nên không xem đó là holdout độc lập nếu có dùng để chọn/chỉnh cấu hình.
+
 `--split dev` chỉ chấm dev. Sau khi chốt cấu hình, dùng `--split test` và chọn thư mục kết quả khác. Nếu test Day 6 từng dùng để chỉnh hệ thống, tạo test mới theo [GUIDE.md](../GUIDE.md). Baseline mẫu dùng evidence nằm trong một chunk và context từ top-3; cần mở rộng hoặc tự đánh giá nếu dùng multi-hop, context từ nhiều lượt hay schema khác. Khớp nguyên văn bằng code không thay thế đánh giá thủ công.
 
-## 4. Tổng hợp đánh giá agent
+## 5. Tổng hợp đánh giá agent
 
 Sau khi chạy agent thật và tự chấm, chuẩn bị ba JSON array:
 
